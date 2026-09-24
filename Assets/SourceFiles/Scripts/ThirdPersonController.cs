@@ -417,17 +417,19 @@ public bool IsRespawning { get; set; } = false;
             }
         }
         public void ResetCameraRotation(float targetYaw)
-{
-    // Reset the yaw and pitch to default values (targetYaw for Y rotation, and 0 for pitch)
-    _cinemachineTargetYaw = targetYaw;
-    _cinemachineTargetPitch = 0f;
+        {
+            _cinemachineTargetYaw = targetYaw;
+            _cinemachineTargetPitch = 0f;
 
-    // Reset the camera target's rotation explicitly
-    CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch, _cinemachineTargetYaw, 0f);
+            CinemachineCameraTarget.transform.rotation = Quaternion.Euler(
+                _cinemachineTargetPitch,
+                _cinemachineTargetYaw,
+                0f);
+        }
 
-    Debug.Log($"Camera Yaw reset to {targetYaw} degrees.");
-}
+        public void ResetVerticalVelocity()
+        {
+            _verticalVelocity = 0f;
+        }
     }
-
-    
 }
