@@ -1,0 +1,39 @@
+name: Repository check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: weather-unity-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Unity version
+        run: grep -q '^m_EditorVersion: 6000.4.7f1$' ProjectSettings/ProjectVersion.txt
+
+      - name: Validate package manifest
+        run: |
+          python -m json.tool Packages/manifest.json > /dev/null
+          if [ -f Packages/packages-lock.json ]; then
+            python -m json.tool Packages/packages-lock.json > /dev/null
+          fi
+
+      - name: Reject generated Unity and IDE files
+        shell: bash
+        run: |
+          tracked=$(git ls-files | grep -E '(^|/)(Library|Temp|Obj|Build|Builds|Logs|UserSettings)/|\.(csproj|sln|suo|user)$' || true)
+          if [ -n "$tracked" ]; then
+            echo "Generated files should not be committed:"
+            echo "$tracked"
+            exit 1
+          fi
